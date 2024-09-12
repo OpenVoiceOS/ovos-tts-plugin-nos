@@ -10,6 +10,8 @@ To use the `'sabela'` voice you also need to install `cotovia`, follow the steps
 
 ## Configuration
 
+valid voices are  `'celtia'` and  `'sabela'`
+
 ```json
   "tts": {
     "module": "ovos-tts-plugin-nos",
@@ -20,7 +22,19 @@ To use the `'sabela'` voice you also need to install `cotovia`, follow the steps
  
 ```
 
-valid voices are  `'celtia'` and  `'sabela'`
+If using voice `sabela`, `bin` can be used to set a path to the `cotovia` executable (default `/usr/bin/cotovia`)
+
+```json
+  "tts": {
+    "module": "ovos-tts-plugin-nos",
+    "ovos-tts-plugin-nos": {
+      "voice": "sabela",
+      "bin": "/usr/bin/cotovia"
+    }
+   }
+ 
+```
+
 
 ## Credits
 
