@@ -1,82 +1,61 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import os
-import shutil
+import os.path
 import subprocess
-from distutils.spawn import find_executable
-from os import makedirs
-from os.path import join
-from tempfile import gettempdir
+from typing import Optional
 
+import requests
+from TTS.utils.synthesizer import Synthesizer
 from ovos_plugin_manager.templates.tts import TTS
+from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
 from ovos_utils.log import LOG
+from ovos_utils.xdg_utils import xdg_data_home
 
 
-class CotoviaTTSPlugin(TTS):
-    """Interface to cotovia TTS."""
+class NosTTSPlugin(TTS):
+    CELTIA = "https://huggingface.co/proxectonos/Nos_TTS-celtia-vits-graphemes/resolve/main/celtia.pth"
+    SABELA = "https://huggingface.co/proxectonos/Nos_TTS-sabela-vits-phonemes/resolve/main/sabela.pth"
 
     def __init__(self, lang="gl-es", config=None):
         config = config or {}
         config["lang"] = lang
-        super(CotoviaTTSPlugin, self).__init__(lang=lang, config=config, audio_ext='wav')
-        self.pitch_scale_factor = self.config.get("pitch_scale_factor", 100)
-        self.time_scale_factor = self.config.get("time_scale_factor", 100)
-        self.data_path = self.config.get("data_path") or "/usr/share/cotovia/data"
+        super().__init__(lang=lang, config=config, audio_ext='wav')
         if self.voice == "default":
-            self.voice = self.get_voices(self.data_path)[0]
-        self.bin = self.config.get("bin") or find_executable("cotovia") or "/usr/bin/cotovia"
-        if self.lang.split("-")[0] not in ["es", "gl"]:
-            raise ValueError(f"unsupported language: {self.lang}")
+            self.voice = "celtia"
+        self.cotovia = CotoviaTTSPlugin()
 
     @staticmethod
-    def get_voices(data_path):
-        if not os.path.isdir(data_path):
-            raise RuntimeError("No cotovia voices found! did you install any?")
-        return [f for f in os.listdir(data_path) if f != "lang"]
+    def download(url):
+        path = f"{xdg_data_home()}/nos_tts_models"
+        os.makedirs(path, exist_ok=True)
+        # Get the file name from the URL
+        file_name = url.split("/")[-1]
+        file_path = f"{path}/{file_name}"
+        if not os.path.isfile(file_path):
+            LOG.info(f"downloading {url}  - this might take a while!")
+            # Stream the download in chunks
+            with requests.get(url, stream=True) as response:
+                response.raise_for_status()  # Check if the request was successful
+                with open(file_path, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+        return file_path
 
-    def get_tts(self, sentence, wav_file, lang=None, voice=None,
-                pitch_scale_factor=None, time_scale_factor=None):
-        """Fetch tts audio using cotovia
+    def phonemize(self, sentence: str) -> str:
+        cmd = f'echo "{sentence}" | {self.cotovia.bin} -t -n -S | iconv -f iso88591 -t utf8'
+        return subprocess.check_output(cmd, shell=True).decode("utf-8")
 
-        Arguments:
-            sentence (str): Sentence to generate audio for
-            wav_file (str): output file path
-        Returns:
-            Tuple ((str) written file, None)
-        """
-        # optional kwargs, OPM will send them if they are in message.data
-        lang = (lang or self.lang).split("-")[0]
-        if lang not in ["es", "gl"]:
-            LOG.warning(f"Unsupported language! using default 'gl'")
-            lang = "gl"
+    def get_tts(self, sentence, wav_file, voice=None):
         voice = voice or self.voice
-        pitch = pitch_scale_factor or self.pitch_scale_factor
-        ts = time_scale_factor or self.time_scale_factor
-
-        if voice.lower() not in self.get_voices(self.data_path):
-            LOG.warning(f"Unknown voice! using default {self.voice}")
-            voice = self.voice
-
-        # api wont let set filename only base folder!
-        output_path = join(gettempdir(), "cotovia")
-        makedirs(output_path, exist_ok=True)
-
-        cmd = f'echo "{sentence}" | {self.bin} --voice={voice} --lang={lang} ' \
-              f'--pitch-scale={pitch} --time-scale={ts} --wav-file-output ' \
-              f'--output-dir={output_path} --data-dir={self.data_path}'
-        subprocess.call(cmd, shell=True)
-        shutil.move(f"{output_path}/default.wav", wav_file)
-
+        if voice == "sabela":
+            synth = self.get_engine(self.SABELA)
+            sentence = self.phonemize(sentence)
+        else:
+            if voice != "celtia":
+                LOG.warning(f"invalid voice '{voice}', falling back to default 'celtia'")
+            synth = self.get_engine(self.CELTIA)
+        wavs = synth.tts(sentence)
+        synth.save_wav(wavs, wav_file)
         return (wav_file, None)  # No phonemes
 
     @property
@@ -87,20 +66,26 @@ class CotoviaTTSPlugin(TTS):
         Returns:
             set: supported languages
         """
-        return set(CotoviaTTSPluginConfig.keys())
+        return {"gl-es"}
 
+    @classmethod
+    def get_engine(cls, model_path: str, config_path: Optional[str] = None) -> Synthesizer:
+        config_path = config_path or model_path.replace(".pth", "_config.json")
+        if model_path.startswith("http"):
+            model_path = NosTTSPlugin.download(model_path)
+        if config_path.startswith("http"):
+            config_path = NosTTSPlugin.download(config_path)
 
-CotoviaTTSPluginConfig = {
-    lang: [
-        {"lang": lang, "voice": "iago",
-         "meta": {"gender": "male", "display_name": f"Iago",
-                  "offline": True, "priority": 60}},
-        {"lang": lang, "voice": "sabela",
-         "meta": {"gender": "female", "display_name": f"Sabela",
-                  "offline": True, "priority": 55}}
-    ] for lang in ["es-es", "es-gl"]
-}
+        synthesizer = Synthesizer(
+            model_path, config_path,
+            None, None,
+            None, None,
+        )
+        return synthesizer
+
 
 if __name__ == "__main__":
-    tts = CotoviaTTSPlugin(lang="gl-es")
-    tts.get_tts("hola mundo", "test.wav", voice="iago")
+    text = "Este é un sistema de conversión de texto a voz en lingua galega baseado en redes neuronais artificiais." \
+           "Ten en conta que as funcionalidades incluídas nesta páxina ofrécense unicamente con fins de demostración. Se tes algún comentario, suxestión ou detectas algún problema durante a demostración, ponte en contacto connosco."
+    tts = NosTTSPlugin(lang="gl-es")
+    tts.get_tts(text, "test2.wav")
