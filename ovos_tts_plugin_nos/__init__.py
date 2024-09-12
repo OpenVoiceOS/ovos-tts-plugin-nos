@@ -21,7 +21,7 @@ class NosTTSPlugin(TTS):
         super().__init__(lang=lang, config=config, audio_ext='wav')
         if self.voice == "default":
             self.voice = "celtia"
-        self.cotovia = CotoviaTTSPlugin()
+        self.cotovia = CotoviaTTSPlugin(lang=lang, config=config)
 
     @staticmethod
     def download(url):
