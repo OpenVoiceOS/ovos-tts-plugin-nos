@@ -44,4 +44,4 @@ If using voice `sabela`, `bin` can be used to set a path to the `cotovia` execut
 
 <img src="img_1.png" width="64"/>
 
-> O [Proxecto Nós](https://github.com/proxectonos) é un proxecto da Xunta de Galicia cuxa execución foi encomendada á Universidade de Santiago de Compostela, a través de dúas entidades punteiras de investigación en intelixencia artificial e tecnoloxías da linguaxe: o ILG (Instituto da Lingua Galega) e o CiTIUS (Centro Singular de Investigación en Tecnoloxías Intelixentes).
+> This research was funded by [Proxecto Nós](https://github.com/proxectonos) - “The Nós project: Galician in the society and economy of Artificial Intelligence”, resulting from the agreement 2021-CP080 between the Xunta de Galicia and the University of Santiago de Compostela, and thanks to the Investigo program, within the National Recovery, Transformation and Resilience Plan, within the framework of the European Recovery Fund (NextGenerationEU).
