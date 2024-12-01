@@ -70,7 +70,7 @@ class NosTTSPlugin(TTS):
 
     @classmethod
     def get_engine(cls, model_path: str, config_path: Optional[str] = None) -> Synthesizer:
-        config_path = config_path or model_path.replace(".pth", "_config.json")
+        config_path = config_path or model_path.replace("celtia.pth", "config.json").replace("sabela.pth", "config.json")
         if model_path.startswith("http"):
             model_path = NosTTSPlugin.download(model_path)
         if config_path.startswith("http"):
