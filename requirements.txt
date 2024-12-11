@@ -1,2 +1,2 @@
-coqui-tts
+coqui-tts>=0.25.1
 ovos-tts-plugin-cotovia

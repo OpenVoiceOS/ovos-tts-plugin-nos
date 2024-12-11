@@ -130,9 +130,7 @@ class NosTTSPlugin(TTS):
             config_path = NosTTSPlugin.download(config_path)
 
         synthesizer = Synthesizer(
-            model_path, config_path,
-            None, None,
-            None, None,
+            tts_checkpoint=model_path, tts_config_path=config_path
         )
         return synthesizer
 
