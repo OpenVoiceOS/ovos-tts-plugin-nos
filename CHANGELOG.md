@@ -1,12 +1,20 @@
 # Changelog
 
-## [0.5.1a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.5.1a1) (2024-09-12)
+## [0.6.0a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.6.0a1) (2024-12-11)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.5.0...0.5.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.5.2a1...0.6.0a1)
 
 **Merged pull requests:**
 
-- fix:cotovia\_config [\#1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/1) ([JarbasAl](https://github.com/JarbasAl))
+- feat: text normalization [\#5](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/5) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.5.2a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.5.2a1) (2024-12-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.5.1...0.5.2a1)
+
+**Merged pull requests:**
+
+- fix: handle changed urls [\#3](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/3) ([JarbasAl](https://github.com/JarbasAl))
 
 
 

@@ -1,27 +1,30 @@
 import os
 import os.path
+import re
 import subprocess
 from typing import Optional
 
 import requests
 from TTS.utils.synthesizer import Synthesizer
-from ovos_plugin_manager.templates.tts import TTS
-from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
 from ovos_utils.log import LOG
 from ovos_utils.xdg_utils import xdg_data_home
+from quebra_frases import sentence_tokenize
+
+from ovos_plugin_manager.templates.tts import TTS
+from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
 
 
 class NosTTSPlugin(TTS):
     CELTIA = "https://huggingface.co/proxectonos/Nos_TTS-celtia-vits-graphemes/resolve/main/celtia.pth"
     SABELA = "https://huggingface.co/proxectonos/Nos_TTS-sabela-vits-phonemes/resolve/main/sabela.pth"
 
-    def __init__(self, lang="gl-es", config=None):
+    def __init__(self, config=None):
         config = config or {}
-        config["lang"] = lang
-        super().__init__(lang=lang, config=config, audio_ext='wav')
+        config["lang"] = "gl-ES"
+        super().__init__(config=config, audio_ext='wav')
         if self.voice == "default":
             self.voice = "celtia"
-        self.cotovia = CotoviaTTSPlugin(lang=lang, config=config)
+        self.cotovia = CotoviaTTSPlugin(config=config)
 
     @staticmethod
     def download(url):
@@ -43,17 +46,66 @@ class NosTTSPlugin(TTS):
 
     def phonemize(self, sentence: str) -> str:
         cmd = f'echo "{sentence}" | {self.cotovia.bin} -t -n -S | iconv -f iso88591 -t utf8'
-        return subprocess.check_output(cmd, shell=True).decode("utf-8")
+        str_ext = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
-    def get_tts(self, sentence, wav_file, voice=None):
+        ## fix punctuation in cotovia output - from official inference script
+
+        # substitute ' ·\n' by ...
+        str_ext = re.sub(r" ·", r"...", str_ext)
+
+        # remove spaces before , . ! ? ; : ) ] of the extended string
+        str_ext = re.sub(r"\s+([.,!?;:)\]])", r"\1", str_ext)
+
+        # remove spaces after ( [ ¡ ¿ of the extended string
+        str_ext = re.sub(r"([\(\[¡¿])\s+", r"\1", str_ext)
+
+        # remove unwanted spaces between quotations marks
+        str_ext = re.sub(r'"\s*([^"]*?)\s*"', r'"\1"', str_ext)
+
+        # substitute '- text -' to '-text-'
+        str_ext = re.sub(r"-\s*([^-]*?)\s*-", r"-\1-", str_ext)
+
+        # remove initial question marks
+        str_ext = re.sub(r"[¿¡]", r"", str_ext)
+
+        # eliminate extra spaces
+        str_ext = re.sub(r"\s+", r" ", str_ext)
+
+        str_ext = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", str_ext)
+
+        ### - , ' and () by commas
+        # substitute '- text -' to ', text,'
+        str_ext = re.sub(r"(\w+)\s+-([^-]*?)-\s+([^-]*?)", r"\1, \2, ", str_ext)
+
+        # substitute ' - ' by ', '
+        str_ext = re.sub(r"(\w+[!\?]?)\s+-\s*", r"\1, ", str_ext)
+
+        # substitute ' ( text )' to ', text,'
+        str_ext = re.sub(r"(\w+)\s*\(\s*([^\(\)]*?)\s*\)", r"\1, \2,", str_ext)
+
+        return str_ext
+
+    def get_tts(self, sentence, wav_file, lang=None, voice=None):
         voice = voice or self.voice
+        ## minor text preprocessing - taken from official inference script
+        # substitute ' M€' by 'millóns de euros' and 'somewordM€' by 'someword millóns de euros'
+        sentence = re.sub(r"(\w+)\s*M€", r"\1 millóns de euros", sentence)
+
+        # substitute ' €' by 'euros' and 'someword€' by 'someword euros'
+        sentence = re.sub(r"(\w+)\s*€", r"\1 euros", sentence)
+
+        # substitute ' ºC' by 'graos centígrados' and 'somewordºC' by 'someword graos centígrados'
+        sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
+
         if voice == "sabela":
             synth = self.get_engine(self.SABELA)
-            sentence = self.phonemize(sentence)
+            # preserve sentence boundaries to make the synth more natural
+            sentence = ". ".join([self.phonemize(s) for s in sentence_tokenize(sentence)])
         else:
             if voice != "celtia":
                 LOG.warning(f"invalid voice '{voice}', falling back to default 'celtia'")
             synth = self.get_engine(self.CELTIA)
+
         wavs = synth.tts(sentence)
         synth.save_wav(wavs, wav_file)
         return (wav_file, None)  # No phonemes
@@ -70,7 +122,8 @@ class NosTTSPlugin(TTS):
 
     @classmethod
     def get_engine(cls, model_path: str, config_path: Optional[str] = None) -> Synthesizer:
-        config_path = config_path or model_path.replace(".pth", "_config.json")
+        config_path = config_path or model_path.replace("celtia.pth", "config.json").replace("sabela.pth",
+                                                                                             "config.json")
         if model_path.startswith("http"):
             model_path = NosTTSPlugin.download(model_path)
         if config_path.startswith("http"):
@@ -85,7 +138,6 @@ class NosTTSPlugin(TTS):
 
 
 if __name__ == "__main__":
-    text = "Este é un sistema de conversión de texto a voz en lingua galega baseado en redes neuronais artificiais." \
-           "Ten en conta que as funcionalidades incluídas nesta páxina ofrécense unicamente con fins de demostración. Se tes algún comentario, suxestión ou detectas algún problema durante a demostración, ponte en contacto connosco."
-    tts = NosTTSPlugin(lang="gl-es")
-    tts.get_tts(text, "test2.wav")
+    text = "Este é un sistema de conversión de texto a voz en lingua galega baseado en redes neuronais artificiais. Ten en conta que as funcionalidades incluídas nesta páxina ofrécense unicamente con fins de demostración. Se tes algún comentario, suxestión ou detectas algún problema durante a demostración, ponte en contacto connosco."
+    tts = NosTTSPlugin({"voice": "sabela"})
+    tts.get_tts(text, "test.wav")
