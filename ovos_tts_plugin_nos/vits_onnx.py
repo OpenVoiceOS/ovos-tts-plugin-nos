@@ -55,33 +55,33 @@ class Graphemes:
             is_sorted: bool = True,
     ) -> None:
         """
-            Initialize a Graphemes instance with character sets and vocabulary configuration.
-            
-            Parameters:
-                characters (str, optional): A string of characters to include in the vocabulary. Defaults to None.
-                punctuations (str, optional): A string of punctuation characters to include. Defaults to None.
-                pad (str, optional): A padding token. Defaults to None.
-                eos (str, optional): End-of-sequence token. Defaults to None.
-                bos (str, optional): Beginning-of-sequence token. Defaults to None.
-                blank (str, optional): Blank token used in tokenization. Defaults to "<BLNK>".
-                is_unique (bool, optional): Whether to ensure unique characters in the vocabulary. Defaults to False.
-                is_sorted (bool, optional): Whether to sort the characters in the vocabulary. Defaults to True.
-            
-            Attributes:
-                _characters (str): Stored characters for vocabulary creation
-                _punctuations (str): Stored punctuation characters
-                _pad (str): Padding token
-                _eos (str): End-of-sequence token
-                _bos (str): Beginning-of-sequence token
-                _blank (str): Blank token
-                is_unique (bool): Flag for unique character requirement
-                is_sorted (bool): Flag for character sorting
-            
-            Notes:
-                - Calls _create_vocab() to generate the vocabulary after initialization
-                - Allows flexible configuration of character sets and special tokens
-            """
-            self._characters = characters
+        Initialize a Graphemes instance with character sets and vocabulary configuration.
+
+        Parameters:
+            characters (str, optional): A string of characters to include in the vocabulary. Defaults to None.
+            punctuations (str, optional): A string of punctuation characters to include. Defaults to None.
+            pad (str, optional): A padding token. Defaults to None.
+            eos (str, optional): End-of-sequence token. Defaults to None.
+            bos (str, optional): Beginning-of-sequence token. Defaults to None.
+            blank (str, optional): Blank token used in tokenization. Defaults to "<BLNK>".
+            is_unique (bool, optional): Whether to ensure unique characters in the vocabulary. Defaults to False.
+            is_sorted (bool, optional): Whether to sort the characters in the vocabulary. Defaults to True.
+
+        Attributes:
+            _characters (str): Stored characters for vocabulary creation
+            _punctuations (str): Stored punctuation characters
+            _pad (str): Padding token
+            _eos (str): End-of-sequence token
+            _bos (str): Beginning-of-sequence token
+            _blank (str): Blank token
+            is_unique (bool): Flag for unique character requirement
+            is_sorted (bool): Flag for character sorting
+
+        Notes:
+            - Calls _create_vocab() to generate the vocabulary after initialization
+            - Allows flexible configuration of character sets and special tokens
+        """
+        self._characters = characters
         self._punctuations = punctuations
         self._pad = pad
         self._eos = eos
@@ -95,10 +95,10 @@ class Graphemes:
     def pad_id(self) -> int:
         """
         Returns the ID for the padding character.
-        
+
         If a padding character is defined, returns its corresponding ID from the vocabulary.
         If no padding character is specified, returns the length of the vocabulary as a default padding ID.
-        
+
         Returns:
             int: The ID of the padding character or the vocabulary length
         """
@@ -108,10 +108,10 @@ class Graphemes:
     def blank_id(self) -> int:
         """
         Returns the ID of the blank token in the vocabulary.
-        
+
         If a blank token is defined, returns its corresponding ID using char_to_id method.
         If no blank token is specified, returns the length of the current vocabulary as a default blank token ID.
-        
+
         Returns:
             int: The ID of the blank token or the next available vocabulary index
         """
@@ -121,10 +121,10 @@ class Graphemes:
     def eos_id(self) -> int:
         """
         Returns the ID for the end-of-sentence (EOS) token.
-        
+
         If an EOS token is defined, returns its corresponding character ID from the vocabulary.
         If no EOS token is defined, returns the length of the vocabulary as a default ID.
-        
+
         Returns:
             int: The ID of the end-of-sentence token or the vocabulary length
         """
@@ -134,11 +134,11 @@ class Graphemes:
     def bos_id(self) -> int:
         """
         Returns the ID for the beginning-of-sequence (BOS) token.
-        
-        If a BOS token is defined, returns its corresponding vocabulary ID. 
-        If no BOS token is specified, returns the length of the current vocabulary, 
+
+        If a BOS token is defined, returns its corresponding vocabulary ID.
+        If no BOS token is specified, returns the length of the current vocabulary,
         which represents a default/fallback ID for the beginning-of-sequence marker.
-        
+
         Returns:
             int: The vocabulary ID for the beginning-of-sequence token
         """
@@ -148,7 +148,7 @@ class Graphemes:
     def characters(self):
         """
         Get the set of characters in the vocabulary.
-        
+
         Returns:
             str: A string containing all characters in the vocabulary.
         """
@@ -158,13 +158,13 @@ class Graphemes:
     def characters(self, characters):
         """
         Set the characters for the vocabulary and regenerate the vocabulary.
-        
+
         This method allows updating the character set for the Graphemes instance and automatically
         rebuilds the internal vocabulary mapping based on the new characters.
-        
+
         Parameters:
             characters (str): A string containing the characters to be used in the vocabulary.
-        
+
         Side Effects:
             - Updates the internal `_characters` attribute
             - Calls `_create_vocab()` to rebuild the vocabulary mappings
@@ -176,7 +176,7 @@ class Graphemes:
     def punctuations(self):
         """
         Get the set of punctuation characters used in the vocabulary.
-        
+
         Returns:
             str: A string containing all punctuation characters defined for the grapheme set.
         """
@@ -186,9 +186,9 @@ class Graphemes:
     def punctuations(self, punctuations):
         """
         Set the punctuation characters for the vocabulary and recreate the vocabulary.
-        
+
         This method allows updating the punctuation characters used in the Graphemes vocabulary. After setting the new punctuation characters, it triggers the recreation of the vocabulary to incorporate the updated punctuation set.
-        
+
         Parameters:
             punctuations (str): A string containing punctuation characters to be included in the vocabulary.
         """
@@ -199,7 +199,7 @@ class Graphemes:
     def pad(self):
         """
         Returns the padding token ID for the grapheme vocabulary.
-        
+
         Returns:
             int: The ID of the padding token used in the vocabulary.
         """
@@ -209,10 +209,10 @@ class Graphemes:
     def pad(self, pad):
         """
         Set the padding character and recreate the vocabulary.
-        
+
         This method allows updating the padding character for the Graphemes instance
         and triggers a vocabulary recreation to incorporate the new padding character.
-        
+
         Parameters:
             pad (str): The padding character to be used in the vocabulary.
         """
@@ -223,7 +223,7 @@ class Graphemes:
     def eos(self):
         """
         Returns the end-of-sentence (EOS) token ID.
-        
+
         Returns:
             int: The ID representing the end-of-sentence token in the vocabulary.
         """
@@ -233,9 +233,9 @@ class Graphemes:
     def eos(self, eos):
         """
         Set the end-of-sentence (EOS) token and recreate the vocabulary.
-        
+
         This method allows updating the end-of-sentence token for the Graphemes instance and triggers a vocabulary reconstruction to incorporate the new token.
-        
+
         Parameters:
             eos (str): The new end-of-sentence token to be used in the vocabulary.
         """
@@ -246,7 +246,7 @@ class Graphemes:
     def bos(self):
         """
         Returns the beginning-of-sequence (BOS) token ID.
-        
+
         Returns:
             int: The ID representing the beginning of a sequence in the character vocabulary.
         """
@@ -256,9 +256,9 @@ class Graphemes:
     def bos(self, bos):
         """
         Set the beginning-of-sentence (BOS) token and recreate the vocabulary.
-        
+
         This method allows updating the beginning-of-sentence token for the Graphemes instance and triggers a vocabulary reconstruction to incorporate the new token.
-        
+
         Parameters:
             bos (str): The token to be used as the beginning-of-sentence marker.
         """
@@ -269,7 +269,7 @@ class Graphemes:
     def blank(self):
         """
         Returns the blank token used in the grapheme vocabulary.
-        
+
         Returns:
             str: The blank token symbol, typically representing a pause or silence in the character set.
         """
@@ -279,12 +279,12 @@ class Graphemes:
     def blank(self, blank):
         """
         Set the blank token and recreate the vocabulary.
-        
+
         This method allows updating the blank token used in the Graphemes vocabulary and triggers a recreation of the vocabulary with the new blank token.
-        
+
         Parameters:
             blank (str): The new blank token to be used in the vocabulary. Typically a special character or string representing a blank/pause.
-        
+
         Side Effects:
             - Updates the internal blank token attribute
             - Calls `_create_vocab()` to regenerate the vocabulary with the new blank token
@@ -296,7 +296,7 @@ class Graphemes:
     def vocab(self):
         """
         Returns the vocabulary dictionary mapping characters to their unique integer IDs.
-        
+
         Returns:
             dict: A dictionary where keys are characters and values are their corresponding integer IDs.
         """
@@ -306,14 +306,14 @@ class Graphemes:
     def vocab(self, vocab):
         """
         Create vocabulary mappings from a given list of characters.
-        
+
         This method initializes two internal dictionaries:
         - `_char_to_id`: Maps characters to their unique integer indices
         - `_id_to_char`: Maps integer indices back to their corresponding characters
-        
+
         Parameters:
             vocab (list): A list of characters defining the vocabulary
-        
+
         Side Effects:
             - Sets `self._vocab` to the input vocabulary
             - Creates `self._char_to_id` dictionary for character-to-index mapping
@@ -329,7 +329,7 @@ class Graphemes:
     def num_chars(self):
         """
         Returns the total number of characters in the vocabulary.
-        
+
         Returns:
             int: The number of unique characters in the vocabulary.
         """
@@ -338,18 +338,18 @@ class Graphemes:
     def _create_vocab(self):
         """
         Create the vocabulary and character-to-ID mappings for the Graphemes class.
-        
+
         This method initializes the vocabulary by combining padding, punctuation, characters, and blank tokens
         in a specific order. It creates two dictionaries:
         - `_char_to_id`: Maps characters to their unique integer indices
         - `_id_to_char`: Maps integer indices back to their corresponding characters
-        
+
         The vocabulary order is:
         1. Padding token
         2. Punctuation characters
         3. Regular characters
         4. Blank token
-        
+
         Returns:
             None. Populates internal `_vocab`, `_char_to_id`, and `_id_to_char` attributes.
         """
@@ -361,16 +361,16 @@ class Graphemes:
     def char_to_id(self, char: str) -> int:
         """
         Convert a character to its corresponding integer ID in the vocabulary.
-        
+
         Parameters:
             char (str): A single character to convert to its vocabulary ID.
-        
+
         Returns:
             int: The integer ID associated with the input character.
-        
+
         Raises:
             KeyError: If the input character is not present in the vocabulary.
-        
+
         Example:
             graphemes = Graphemes(characters='abcdef')
             id_of_a = graphemes.char_to_id('a')  # Returns 0
@@ -384,16 +384,16 @@ class Graphemes:
     def id_to_char(self, idx: int) -> str:
         """
         Convert a token ID to its corresponding character.
-        
+
         Parameters:
             idx (int): The integer ID of the token to convert.
-        
+
         Returns:
             str: The character corresponding to the given token ID.
-        
+
         Raises:
             KeyError: If the provided index is not found in the vocabulary mapping.
-        
+
         Example:
             graphemes = Graphemes()
             char = graphemes.id_to_char(5)  # Returns the character at index 5 in the vocabulary
@@ -422,22 +422,22 @@ class TTSTokenizer:
             use_eos_bos=False,
     ):
         """
-            Initialize a TTSTokenizer with optional text cleaning, character vocabulary, and tokenization settings.
-            
-            Parameters:
-                text_cleaner (Callable, optional): A function to preprocess and clean input text before tokenization.
-                characters (Graphemes, optional): A Graphemes object defining the character vocabulary for tokenization.
-                add_blank (bool, default=False): Whether to intersperse blank tokens between character tokens during encoding.
-                use_eos_bos (bool, default=False): Whether to add beginning and end of sequence tokens to the token sequence.
-            
-            Attributes:
-                text_cleaner (Callable): Text preprocessing function.
-                add_blank (bool): Flag to insert blank tokens between characters.
-                use_eos_bos (bool): Flag to add start and end sequence tokens.
-                characters (Graphemes): Character vocabulary for token mapping.
-                not_found_characters (List[str]): Tracks characters not found in the vocabulary during tokenization.
-            """
-            self.text_cleaner = text_cleaner
+        Initialize a TTSTokenizer with optional text cleaning, character vocabulary, and tokenization settings.
+
+        Parameters:
+            text_cleaner (Callable, optional): A function to preprocess and clean input text before tokenization.
+            characters (Graphemes, optional): A Graphemes object defining the character vocabulary for tokenization.
+            add_blank (bool, default=False): Whether to intersperse blank tokens between character tokens during encoding.
+            use_eos_bos (bool, default=False): Whether to add beginning and end of sequence tokens to the token sequence.
+
+        Attributes:
+            text_cleaner (Callable): Text preprocessing function.
+            add_blank (bool): Flag to insert blank tokens between characters.
+            use_eos_bos (bool): Flag to add start and end sequence tokens.
+            characters (Graphemes): Character vocabulary for token mapping.
+            not_found_characters (List[str]): Tracks characters not found in the vocabulary during tokenization.
+        """
+        self.text_cleaner = text_cleaner
         self.add_blank = add_blank
         self.use_eos_bos = use_eos_bos
         self.characters = characters
@@ -447,7 +447,7 @@ class TTSTokenizer:
     def characters(self):
         """
         Get the set of characters in the vocabulary.
-        
+
         Returns:
             str: A string containing all characters in the vocabulary.
         """
@@ -457,12 +457,12 @@ class TTSTokenizer:
     def characters(self, new_characters):
         """
         Set the characters configuration and update special token IDs.
-        
+
         This method updates the internal character configuration and recalculates the IDs for padding and blank tokens based on the new character set.
-        
+
         Parameters:
             new_characters (Graphemes): A Graphemes object representing the character vocabulary to be used.
-        
+
         Side Effects:
             - Updates the internal `_characters` attribute
             - Recalculates `pad_id` and `blank_id` based on the new character set
@@ -474,20 +474,20 @@ class TTSTokenizer:
     def encode(self, text: str) -> List[int]:
         """
         Encode a string of text into a sequence of token IDs based on the character vocabulary.
-        
+
         This method converts each character in the input text to its corresponding token ID. Characters not found in the vocabulary are discarded and logged as warnings.
-        
+
         Parameters:
             text (str): The input text to be tokenized.
-        
+
         Returns:
             List[int]: A list of token IDs representing the input text.
-        
+
         Notes:
             - Out-of-vocabulary characters are silently discarded.
             - Unique out-of-vocabulary characters are tracked and logged with a debug message.
             - Warnings are generated for characters not found in the vocabulary.
-        
+
         Raises:
             No explicit exceptions are raised during the encoding process.
         """
@@ -507,19 +507,19 @@ class TTSTokenizer:
     def text_to_ids(self, text: str) -> List[int]:  # pylint: disable=unused-argument
         """
         Convert text to a sequence of token IDs with optional preprocessing.
-        
+
         Applies a series of transformations to the input text:
         1. Optionally cleans the text using a provided text cleaner function
         2. Encodes the text into token IDs
         3. Optionally inserts blank characters between tokens
         4. Optionally adds beginning and end of sequence tokens
-        
+
         Parameters:
             text (str): Input text to be converted to token IDs
-        
+
         Returns:
             List[int]: A sequence of token IDs after applying configured transformations
-        
+
         Notes:
             - Uses self.text_cleaner for optional text preprocessing
             - Supports optional blank character insertion
@@ -537,13 +537,13 @@ class TTSTokenizer:
     def pad_with_bos_eos(self, char_sequence: List[int]):
         """
         Pad a character sequence with beginning-of-sequence (BOS) and end-of-sequence (EOS) tokens.
-        
+
         Parameters:
             char_sequence (List[int]): A list of character token IDs to be padded.
-        
+
         Returns:
             List[int]: A new list with BOS token prepended and EOS token appended to the original sequence.
-        
+
         Example:
             tokenizer = TTSTokenizer(...)
             sequence = [10, 20, 30]
@@ -555,16 +555,16 @@ class TTSTokenizer:
     def intersperse_blank_char(self, char_sequence: List[int]):
         """
         Intersperses the blank character between characters in a sequence.
-        
+
         This method creates a new sequence where the blank character is inserted between each original character, effectively expanding the input sequence with blank tokens.
-        
+
         Parameters:
             char_sequence (List[int]): A list of character IDs to be interspersed with blank tokens.
-        
+
         Returns:
-            List[int]: A new sequence with blank tokens inserted between each original character, 
+            List[int]: A new sequence with blank tokens inserted between each original character,
                        with blank tokens at the beginning and end of the sequence.
-        
+
         Example:
             If char_sequence is [5, 10, 15] and blank_id is 0, the result will be:
             [0, 5, 0, 10, 0, 15, 0]
@@ -682,7 +682,7 @@ class VitsOnnxInference:
         scales = np.array(
             [self.config.get("inference_noise_scale", 0.667),
              self.config.get("length_scale", 1.0),
-             self.config.get("inference_noise_scale_dp", 1.0), ],
+             self.config.get("inference_noise_scale_dp", 1.0)],
             dtype=np.float32,
         )
         input_params = {"input": x, "input_lengths": x_lengths, "scales": scales}
