@@ -2,7 +2,7 @@
 import json
 import re
 from typing import Callable, List
-
+from ovos_utils.log import LOG
 import numpy as np
 import onnxruntime as ort
 import scipy
@@ -167,7 +167,7 @@ class Graphemes:
 
 
 class TTSTokenizer:
-    """🐸TTS tokenizer to convert input characters to token IDs and back.
+    """🐸TTS tokenizer to convert input characters to token IDs.
 
     Token IDs for OOV chars are discarded but those are stored in `self.not_found_characters` for later.
 
@@ -213,8 +213,8 @@ class TTSTokenizer:
                 # discard but store not found characters
                 if char not in self.not_found_characters:
                     self.not_found_characters.append(char)
-                    print(text)
-                    print(f" [!] Character {repr(char)} not found in the vocabulary. Discarding it.")
+                    LOG.debug(text)
+                    LOG.warning(f" [!] Character {repr(char)} not found in the vocabulary. Discarding it.")
         return token_ids
 
     def text_to_ids(self, text: str) -> List[int]:  # pylint: disable=unused-argument
@@ -233,22 +233,19 @@ class TTSTokenizer:
             text = self.text_cleaner(text)
         text = self.encode(text)
         if self.add_blank:
-            text = self.intersperse_blank_char(text, True)
+            text = self.intersperse_blank_char(text)
         if self.use_eos_bos:
             text = self.pad_with_bos_eos(text)
         return text
 
-    def pad_with_bos_eos(self, char_sequence: List[str]):
+    def pad_with_bos_eos(self, char_sequence: List[int]):
         """Pads a sequence with the special BOS and EOS characters."""
         return [self.characters.bos_id] + list(char_sequence) + [self.characters.eos_id]
 
-    def intersperse_blank_char(self, char_sequence: List[str], use_blank_char: bool = False):
+    def intersperse_blank_char(self, char_sequence: List[int]):
         """Intersperses the blank character between characters in a sequence.
-
-        Use the ```blank``` character if defined else use the ```pad``` character.
         """
-        char_to_use = self.characters.blank_id if use_blank_char else self.characters.pad
-        result = [char_to_use] * (len(char_sequence) * 2 + 1)
+        result = [self.characters.blank_id] * (len(char_sequence) * 2 + 1)
         result[1::2] = char_sequence
         return result
 
