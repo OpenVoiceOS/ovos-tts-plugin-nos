@@ -2,21 +2,21 @@ import os
 import os.path
 import re
 import subprocess
-from typing import Optional
+from typing import Dict
 
 import requests
-from TTS.utils.synthesizer import Synthesizer
+from ovos_plugin_manager.templates.tts import TTS
+from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
+from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
 from ovos_utils.log import LOG
 from ovos_utils.xdg_utils import xdg_data_home
 from quebra_frases import sentence_tokenize
 
-from ovos_plugin_manager.templates.tts import TTS
-from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
-
 
 class NosTTSPlugin(TTS):
-    CELTIA = "https://huggingface.co/proxectonos/Nos_TTS-celtia-vits-graphemes/resolve/main/celtia.pth"
-    SABELA = "https://huggingface.co/proxectonos/Nos_TTS-sabela-vits-phonemes/resolve/main/sabela.pth"
+    CELTIA = "Jarbas/proxectonos-celtia-vits-graphemes-onnx"
+    SABELA = "Jarbas/proxectonos-sabela-vits-phonemes-onnx"
+    VOICE2ENGINE: Dict[str, VitsOnnxInference] = {}
 
     def __init__(self, config=None):
         config = config or {}
@@ -25,24 +25,30 @@ class NosTTSPlugin(TTS):
         if self.voice == "default":
             self.voice = "celtia"
         self.cotovia = CotoviaTTSPlugin(config=config)
+        # pre-download voices on init if needed
+        self.get_engine(self.voice)
 
     @staticmethod
-    def download(url):
-        path = f"{xdg_data_home()}/nos_tts_models"
+    def download(voice: str):
+        assert voice in ["celtia", "sabela"]
+
+        path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
-        # Get the file name from the URL
-        file_name = url.split("/")[-1]
-        file_path = f"{path}/{file_name}"
-        if not os.path.isfile(file_path):
-            LOG.info(f"downloading {url}  - this might take a while!")
+
+        voice_id = NosTTSPlugin.CELTIA if voice == "celtia" else NosTTSPlugin.SABELA
+
+        if not os.path.isfile(f"{path}/model.onnx"):
+            LOG.info(f"downloading {voice_id}  - this might take a while!")
             # Stream the download in chunks
-            with requests.get(url, stream=True) as response:
+            with requests.get(f"https://huggingface.co/{voice_id}/resolve/main/model.onnx", stream=True) as response:
                 response.raise_for_status()  # Check if the request was successful
-                with open(file_path, "wb") as f:
+                with open(f"{path}/model.onnx", "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-        return file_path
+        if not os.path.isfile(f"{path}/config.json"):
+            with open(f"{path}/config.json", "wb") as f:
+                f.write(requests.get(f"https://huggingface.co/{voice_id}/resolve/main/config.json").content)
 
     def phonemize(self, sentence: str) -> str:
         cmd = f'echo "{sentence}" | {self.cotovia.bin} -t -n -S | iconv -f iso88591 -t utf8'
@@ -98,16 +104,11 @@ class NosTTSPlugin(TTS):
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
         if voice == "sabela":
-            synth = self.get_engine(self.SABELA)
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.phonemize(s) for s in sentence_tokenize(sentence)])
-        else:
-            if voice != "celtia":
-                LOG.warning(f"invalid voice '{voice}', falling back to default 'celtia'")
-            synth = self.get_engine(self.CELTIA)
 
-        wavs = synth.tts(sentence)
-        synth.save_wav(wavs, wav_file)
+        tts = self.get_engine(voice)
+        tts.synth(sentence, wav_file)
         return (wav_file, None)  # No phonemes
 
     @property
@@ -121,18 +122,13 @@ class NosTTSPlugin(TTS):
         return {"gl-es"}
 
     @classmethod
-    def get_engine(cls, model_path: str, config_path: Optional[str] = None) -> Synthesizer:
-        config_path = config_path or model_path.replace("celtia.pth", "config.json").replace("sabela.pth",
-                                                                                             "config.json")
-        if model_path.startswith("http"):
-            model_path = NosTTSPlugin.download(model_path)
-        if config_path.startswith("http"):
-            config_path = NosTTSPlugin.download(config_path)
-
-        synthesizer = Synthesizer(
-            tts_checkpoint=model_path, tts_config_path=config_path
-        )
-        return synthesizer
+    def get_engine(cls, voice: str = "celtia") -> VitsOnnxInference:
+        if voice not in cls.VOICE2ENGINE:
+            cls.download(voice)  # only if missing
+            model_path = f"{xdg_data_home()}/nos_tts_models/{voice}/model.onnx"
+            config_path = f"{xdg_data_home()}/nos_tts_models/{voice}/config.json"
+            cls.VOICE2ENGINE[voice] = VitsOnnxInference(model_path, config_path)
+        return cls.VOICE2ENGINE[voice]
 
 
 if __name__ == "__main__":
