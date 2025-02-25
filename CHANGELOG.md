@@ -1,12 +1,16 @@
 # Changelog
 
-## [0.6.1a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.6.1a1) (2024-12-11)
+## [0.7.0a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.0a1) (2025-02-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.6.0...0.6.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.6.1...0.7.0a1)
+
+**Closed issues:**
+
+- Bug: intersperse\_blank\_char method uses pad character instead of pad\_id [\#11](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/issues/11)
 
 **Merged pull requests:**
 
-- fix: requirements.txt [\#8](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/8) ([JarbasAl](https://github.com/JarbasAl))
+- feat: onnx models [\#10](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/10) ([JarbasAl](https://github.com/JarbasAl))
 
 
 

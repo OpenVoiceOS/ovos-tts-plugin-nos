@@ -2,49 +2,101 @@ import os
 import os.path
 import re
 import subprocess
-from typing import Optional
+from typing import Dict
 
 import requests
-from TTS.utils.synthesizer import Synthesizer
+from ovos_plugin_manager.templates.tts import TTS
+from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
+from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
 from ovos_utils.log import LOG
 from ovos_utils.xdg_utils import xdg_data_home
 from quebra_frases import sentence_tokenize
 
-from ovos_plugin_manager.templates.tts import TTS
-from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
-
 
 class NosTTSPlugin(TTS):
-    CELTIA = "https://huggingface.co/proxectonos/Nos_TTS-celtia-vits-graphemes/resolve/main/celtia.pth"
-    SABELA = "https://huggingface.co/proxectonos/Nos_TTS-sabela-vits-phonemes/resolve/main/sabela.pth"
+    CELTIA = "Jarbas/proxectonos-celtia-vits-graphemes-onnx"
+    SABELA = "Jarbas/proxectonos-sabela-vits-phonemes-onnx"
+    VOICE2ENGINE: Dict[str, VitsOnnxInference] = {}
 
     def __init__(self, config=None):
+        """
+        Initialize the Nos TTS plugin for Galician text-to-speech synthesis.
+        
+        Parameters:
+            config (dict, optional): Configuration dictionary for the TTS plugin. 
+                Defaults to an empty dictionary if not provided.
+        
+        Behavior:
+            - Sets the language to Galician (gl-ES)
+            - Uses the default voice "celtia" if no specific voice is selected
+            - Initializes a Cotovia TTS plugin for phonemization
+            - Pre-downloads the selected voice model during initialization
+        """
         config = config or {}
         config["lang"] = "gl-ES"
         super().__init__(config=config, audio_ext='wav')
         if self.voice == "default":
             self.voice = "celtia"
         self.cotovia = CotoviaTTSPlugin(config=config)
+        # pre-download voices on init if needed
+        self.get_engine(self.voice)
 
     @staticmethod
-    def download(url):
-        path = f"{xdg_data_home()}/nos_tts_models"
+    def download(voice: str):
+        """
+        Download the specified Galician TTS voice model and configuration files.
+        
+        This method downloads the model.onnx and config.json files for either the "celtia" or "sabela" Galician TTS voices from Hugging Face, storing them in the user's local data directory.
+        
+        Parameters:
+            voice (str): The voice to download. Must be either "celtia" or "sabela".
+        
+        Raises:
+            AssertionError: If the voice is not "celtia" or "sabela".
+            requests.exceptions.RequestException: If there are issues downloading the files.
+        
+        Notes:
+            - Creates a directory in the user's XDG data home path for storing models
+            - Downloads model files only if they do not already exist locally
+            - Streams the model.onnx download in chunks to handle large files efficiently
+        """
+        assert voice in ["celtia", "sabela"]
+
+        path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
-        # Get the file name from the URL
-        file_name = url.split("/")[-1]
-        file_path = f"{path}/{file_name}"
-        if not os.path.isfile(file_path):
-            LOG.info(f"downloading {url}  - this might take a while!")
+
+        voice_id = NosTTSPlugin.CELTIA if voice == "celtia" else NosTTSPlugin.SABELA
+
+        if not os.path.isfile(f"{path}/model.onnx"):
+            LOG.info(f"downloading {voice_id}  - this might take a while!")
             # Stream the download in chunks
-            with requests.get(url, stream=True) as response:
+            with requests.get(f"https://huggingface.co/{voice_id}/resolve/main/model.onnx", stream=True) as response:
                 response.raise_for_status()  # Check if the request was successful
-                with open(file_path, "wb") as f:
+                with open(f"{path}/model.onnx", "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-        return file_path
+        if not os.path.isfile(f"{path}/config.json"):
+            with open(f"{path}/config.json", "wb") as f:
+                f.write(requests.get(f"https://huggingface.co/{voice_id}/resolve/main/config.json").content)
 
     def phonemize(self, sentence: str) -> str:
+        """
+        Converts a given sentence into phonemes using the Cotovia TTS binary.
+        
+        Processes the input sentence through a command-line phonemization tool, applying multiple regular expression transformations to clean and normalize the phonetic representation.
+        
+        Parameters:
+            sentence (str): The input text to be phonemized
+        
+        Returns:
+            str: A cleaned and normalized phonetic representation of the input sentence
+        
+        Notes:
+            - Uses subprocess to execute the Cotovia TTS binary
+            - Applies multiple regex substitutions to improve punctuation and spacing
+            - Converts text from ISO-8859-1 to UTF-8 encoding
+        """
         cmd = f'echo "{sentence}" | {self.cotovia.bin} -t -n -S | iconv -f iso88591 -t utf8'
         str_ext = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
@@ -86,6 +138,24 @@ class NosTTSPlugin(TTS):
         return str_ext
 
     def get_tts(self, sentence, wav_file, lang=None, voice=None):
+        """
+        Synthesize text to speech for the Galician language with optional voice selection and text preprocessing.
+        
+        Preprocesses the input sentence by converting currency and temperature symbols to their spoken Galician equivalents. For the "sabela" voice, tokenizes the sentence to improve synthesis naturalness.
+        
+        Parameters:
+            sentence (str): The text to be converted to speech
+            wav_file (str): Path where the output audio file will be saved
+            lang (str, optional): Language code (defaults to None)
+            voice (str, optional): Voice model to use, defaults to the instance's default voice
+        
+        Returns:
+            tuple: A tuple containing the path to the generated WAV file and None for phonemes
+        
+        Notes:
+            - Supports special preprocessing for currency (€, M€) and temperature (ºC) symbols
+            - Uses sentence tokenization for more natural speech synthesis with the "sabela" voice
+        """
         voice = voice or self.voice
         ## minor text preprocessing - taken from official inference script
         # substitute ' M€' by 'millóns de euros' and 'somewordM€' by 'someword millóns de euros'
@@ -98,41 +168,47 @@ class NosTTSPlugin(TTS):
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
         if voice == "sabela":
-            synth = self.get_engine(self.SABELA)
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.phonemize(s) for s in sentence_tokenize(sentence)])
-        else:
-            if voice != "celtia":
-                LOG.warning(f"invalid voice '{voice}', falling back to default 'celtia'")
-            synth = self.get_engine(self.CELTIA)
 
-        wavs = synth.tts(sentence)
-        synth.save_wav(wavs, wav_file)
+        tts = self.get_engine(voice)
+        tts.synth(sentence, wav_file)
         return (wav_file, None)  # No phonemes
 
     @property
     def available_languages(self) -> set:
-        """Return languages supported by this TTS implementation in this state
-        This property should be overridden by the derived class to advertise
-        what languages that engine supports.
+        """
+        Return the set of languages supported by the Nos TTS plugin.
+        
         Returns:
-            set: supported languages
+            set: A set containing the Galician language code "gl-es", indicating support for Galician (Spain).
         """
         return {"gl-es"}
 
     @classmethod
-    def get_engine(cls, model_path: str, config_path: Optional[str] = None) -> Synthesizer:
-        config_path = config_path or model_path.replace("celtia.pth", "config.json").replace("sabela.pth",
-                                                                                             "config.json")
-        if model_path.startswith("http"):
-            model_path = NosTTSPlugin.download(model_path)
-        if config_path.startswith("http"):
-            config_path = NosTTSPlugin.download(config_path)
-
-        synthesizer = Synthesizer(
-            tts_checkpoint=model_path, tts_config_path=config_path
-        )
-        return synthesizer
+    def get_engine(cls, voice: str = "celtia") -> VitsOnnxInference:
+        """
+        Retrieve or initialize a VitsOnnxInference engine for a specific Galician TTS voice.
+        
+        This class method manages a cache of TTS engines, downloading the model if necessary and
+        creating a new VitsOnnxInference instance for the specified voice.
+        
+        Parameters:
+            voice (str, optional): The voice model to retrieve. Defaults to "celtia".
+                                    Must be either "celtia" or "sabela".
+        
+        Returns:
+            VitsOnnxInference: A cached or newly initialized TTS inference engine for the specified voice.
+        
+        Raises:
+            AssertionError: If an unsupported voice is provided.
+        """
+        if voice not in cls.VOICE2ENGINE:
+            cls.download(voice)  # only if missing
+            model_path = f"{xdg_data_home()}/nos_tts_models/{voice}/model.onnx"
+            config_path = f"{xdg_data_home()}/nos_tts_models/{voice}/config.json"
+            cls.VOICE2ENGINE[voice] = VitsOnnxInference(model_path, config_path)
+        return cls.VOICE2ENGINE[voice]
 
 
 if __name__ == "__main__":
