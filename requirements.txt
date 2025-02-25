@@ -1,2 +1,4 @@
-coqui-tts>=0.25.1
+numpy
+scipy
+onnxruntime
 ovos-tts-plugin-cotovia
