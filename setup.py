@@ -35,7 +35,7 @@ def get_package_data():
 
     for root, dirs, files in os.walk(f'{BASEDIR}/ovos_tts_plugin_nos'):
         for file in files:
-            data_files.append(os.path.relpath(os.path.join(root, file), 'pyahotts'))
+            data_files.append(os.path.relpath(os.path.join(root, file), 'ovos_tts_plugin_nos'))
 
     return data_files
 
