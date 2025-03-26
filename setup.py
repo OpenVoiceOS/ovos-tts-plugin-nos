@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -29,12 +29,16 @@ def get_version():
     return version
 
 
-def package_files(directory):
-    paths = []
-    for (path, directories, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
-    return paths
+def get_package_data():
+    """Function to collect all necessary package data files."""
+    data_files = []
+
+    for root, dirs, files in os.walk(f'{BASEDIR}/ovos_tts_plugin_nos'):
+        for file in files:
+            data_files.append(os.path.relpath(os.path.join(root, file), 'ovos_tts_plugin_nos'))
+
+    return data_files
+
 
 
 def required(requirements_file):
@@ -60,7 +64,10 @@ setup(
     author='JarbasAi',
     author_email='jarbasai@mailfence.com',
     license='Apache-2.0',
-    packages=['ovos_tts_plugin_nos'],
+    packages=find_packages(include=['ovos_tts_plugin_nos', 'ovos_tts_plugin_nos.*']),
+    package_data={
+        'ovos_tts_plugin_nos': get_package_data(),
+    },
     install_requires=required("requirements.txt"),
     zip_safe=True,
     classifiers=[
