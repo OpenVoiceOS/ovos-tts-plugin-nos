@@ -3,7 +3,7 @@ import os.path
 import platform
 import re
 import subprocess
-from distutils.spawn import find_executable
+from shutil import which
 from typing import Dict
 
 import requests
@@ -45,7 +45,7 @@ class NosTTSPlugin(TTS):
 
     @staticmethod
     def find_cotovia() -> str:
-        path = find_executable("cotovia") or f"{os.path.dirname(__file__)}/cotovia_{platform.machine()}"
+        path = which("cotovia") or f"{os.path.dirname(__file__)}/cotovia_{platform.machine()}"
         if os.path.isfile(path):
             return path
         return "/usr/bin/cotovia"
