@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.7.1a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.1a1) (2025-03-22)
+## [0.7.2a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.2a1) (2025-03-26)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.0...0.7.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.1...0.7.2a1)
 
 **Merged pull requests:**
 
-- fix: pin working onnxruntime [\#14](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/14) ([JarbasAl](https://github.com/JarbasAl))
+- Cotovia [\#16](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/16) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
