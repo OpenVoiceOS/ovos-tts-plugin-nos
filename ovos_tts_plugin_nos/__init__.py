@@ -1,16 +1,18 @@
 import os
 import os.path
+import platform
 import re
 import subprocess
+from distutils.spawn import find_executable
 from typing import Dict
 
 import requests
 from ovos_plugin_manager.templates.tts import TTS
-from ovos_tts_plugin_cotovia import CotoviaTTSPlugin
-from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
 from ovos_utils.log import LOG
 from ovos_utils.xdg_utils import xdg_data_home
 from quebra_frases import sentence_tokenize
+
+from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
 
 
 class NosTTSPlugin(TTS):
@@ -37,9 +39,16 @@ class NosTTSPlugin(TTS):
         super().__init__(config=config, audio_ext='wav')
         if self.voice == "default":
             self.voice = "celtia"
-        self.cotovia = CotoviaTTSPlugin(config=config)
+        self.cotovia_bin = self.config.get("cotovia") or self.find_cotovia()
         # pre-download voices on init if needed
         self.get_engine(self.voice)
+
+    @staticmethod
+    def find_cotovia() -> str:
+        path = find_executable("cotovia")
+        if not path and platform.machine() == "x86_64":
+            return f"{os.path.dirname(__file__)}/cotovia_x86"
+        return "/usr/bin/cotovia"
 
     @staticmethod
     def download(voice: str):
@@ -80,7 +89,7 @@ class NosTTSPlugin(TTS):
             with open(f"{path}/config.json", "wb") as f:
                 f.write(requests.get(f"https://huggingface.co/{voice_id}/resolve/main/config.json").content)
 
-    def phonemize(self, sentence: str) -> str:
+    def cotovia_phonemize(self, sentence: str) -> str:
         """
         Converts a given sentence into phonemes using the Cotovia TTS binary.
         
@@ -97,7 +106,7 @@ class NosTTSPlugin(TTS):
             - Applies multiple regex substitutions to improve punctuation and spacing
             - Converts text from ISO-8859-1 to UTF-8 encoding
         """
-        cmd = f'echo "{sentence}" | {self.cotovia.bin} -t -n -S | iconv -f iso88591 -t utf8'
+        cmd = f'echo "{sentence}" | {self.cotovia_bin} -t -n -S | iconv -f iso88591 -t utf8'
         str_ext = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
         ## fix punctuation in cotovia output - from official inference script
@@ -169,7 +178,8 @@ class NosTTSPlugin(TTS):
 
         if voice == "sabela":
             # preserve sentence boundaries to make the synth more natural
-            sentence = ". ".join([self.phonemize(s) for s in sentence_tokenize(sentence)])
+            sentence = ". ".join([self.cotovia_phonemize(s)
+                                  for s in sentence_tokenize(sentence)])
 
         tts = self.get_engine(voice)
         tts.synth(sentence, wav_file)
