@@ -45,9 +45,9 @@ class NosTTSPlugin(TTS):
 
     @staticmethod
     def find_cotovia() -> str:
-        path = find_executable("cotovia")
-        if not path and platform.machine() == "x86_64":
-            return f"{os.path.dirname(__file__)}/cotovia_x86"
+        path = find_executable("cotovia") or f"{os.path.dirname(__file__)}/cotovia_{platform.machine()}"
+        if os.path.isfile(path):
+            return path
         return "/usr/bin/cotovia"
 
     @staticmethod
