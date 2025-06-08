@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.7.2a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.2a1) (2025-03-26)
+## [0.7.3a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.3a1) (2025-06-08)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.1...0.7.2a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.2...0.7.3a1)
 
 **Merged pull requests:**
 
-- Cotovia [\#16](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/16) ([JarbasAl](https://github.com/JarbasAl))
+- fix: compatibility with ovos-plugin-manager 1.X.X [\#18](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/18) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
