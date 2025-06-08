@@ -1,18 +1,18 @@
-import os
 import os.path
+
+import os
 import platform
 import re
-import subprocess
-from shutil import which
-from typing import Dict
-
 import requests
+import subprocess
 from ovos_plugin_manager.templates.tts import TTS
+from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
+from ovos_utils import classproperty
 from ovos_utils.log import LOG
 from ovos_utils.xdg_utils import xdg_data_home
 from quebra_frases import sentence_tokenize
-
-from ovos_tts_plugin_nos.vits_onnx import VitsOnnxInference
+from shutil import which
+from typing import Dict
 
 
 class NosTTSPlugin(TTS):
@@ -185,8 +185,8 @@ class NosTTSPlugin(TTS):
         tts.synth(sentence, wav_file)
         return (wav_file, None)  # No phonemes
 
-    @property
-    def available_languages(self) -> set:
+    @classproperty
+    def available_languages(cls) -> set:
         """
         Return the set of languages supported by the Nos TTS plugin.
         
