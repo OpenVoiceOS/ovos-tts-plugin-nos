@@ -16,8 +16,9 @@ from typing import Dict
 
 
 class NosTTSPlugin(TTS):
-    CELTIA = "Jarbas/proxectonos-celtia-vits-graphemes-onnx"
-    SABELA = "Jarbas/proxectonos-sabela-vits-phonemes-onnx"
+    CELTIA = "OpenVoiceOS/proxectonos-celtia-vits-graphemes-onnx"
+    SABELA = "OpenVoiceOS/proxectonos-sabela-vits-phonemes-onnx"
+    ICIA = "OpenVoiceOS/proxectonos-icia-vits-phonemes-onnx"
     VOICE2ENGINE: Dict[str, VitsOnnxInference] = {}
 
     def __init__(self, config=None):
@@ -69,12 +70,19 @@ class NosTTSPlugin(TTS):
             - Downloads model files only if they do not already exist locally
             - Streams the model.onnx download in chunks to handle large files efficiently
         """
-        assert voice in ["celtia", "sabela"]
+        assert voice in ["celtia", "sabela", "icia"]
 
         path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
 
-        voice_id = NosTTSPlugin.CELTIA if voice == "celtia" else NosTTSPlugin.SABELA
+        if voice == "celtia":
+            voice_id = NosTTSPlugin.CELTIA 
+        elif voice == "sabela":
+            voice_id = NosTTSPlugin.SABELA
+        elif voice == "icia":
+            voice_id = NosTTSPlugin.ICIA
+        else:
+            raise ValueError(f"unknown voice: {voice}")
 
         if not os.path.isfile(f"{path}/model.onnx"):
             LOG.info(f"downloading {voice_id}  - this might take a while!")
@@ -176,7 +184,7 @@ class NosTTSPlugin(TTS):
         # substitute ' ºC' by 'graos centígrados' and 'somewordºC' by 'someword graos centígrados'
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
-        if voice == "sabela":
+        if voice != "celtia":
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.cotovia_phonemize(s)
                                   for s in sentence_tokenize(sentence)])
