@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.7.3a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.3a1) (2025-06-08)
+## [0.7.4a1](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/tree/0.7.4a1) (2025-11-05)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.2...0.7.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/compare/0.7.3...0.7.4a1)
 
 **Merged pull requests:**
 
-- fix: compatibility with ovos-plugin-manager 1.X.X [\#18](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/18) ([JarbasAl](https://github.com/JarbasAl))
+- add icia voice [\#20](https://github.com/OpenVoiceOS/ovos-tts-plugin-nos/pull/20) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
