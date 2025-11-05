@@ -70,7 +70,7 @@ class NosTTSPlugin(TTS):
             - Downloads model files only if they do not already exist locally
             - Streams the model.onnx download in chunks to handle large files efficiently
         """
-        assert voice in ["celtia", "sabela"]
+        assert voice in ["celtia", "sabela", "icia"]
 
         path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
