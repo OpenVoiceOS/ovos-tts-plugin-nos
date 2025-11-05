@@ -16,8 +16,9 @@ from typing import Dict
 
 
 class NosTTSPlugin(TTS):
-    CELTIA = "Jarbas/proxectonos-celtia-vits-graphemes-onnx"
-    SABELA = "Jarbas/proxectonos-sabela-vits-phonemes-onnx"
+    CELTIA = "OpenVoiceOS/proxectonos-celtia-vits-graphemes-onnx"
+    SABELA = "OpenVoiceOS/proxectonos-sabela-vits-phonemes-onnx"
+    ICIA = "OpenVoiceOS/proxectonos-icia-vits-phonemes-onnx"
     VOICE2ENGINE: Dict[str, VitsOnnxInference] = {}
 
     def __init__(self, config=None):
