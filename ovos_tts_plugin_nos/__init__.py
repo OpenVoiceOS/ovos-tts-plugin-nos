@@ -75,7 +75,14 @@ class NosTTSPlugin(TTS):
         path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
 
-        voice_id = NosTTSPlugin.CELTIA if voice == "celtia" else NosTTSPlugin.SABELA
+        if voice == "celtia":
+            voice_id = NosTTSPlugin.CELTIA 
+        elif voice == "sabela":
+            voice_id = NosTTSPlugin.SABELA
+        elif voice == "icia":
+            voice_id = NosTTSPlugin.ICIA
+        else:
+            raise ValueError(f"unknown voice: {voice}")
 
         if not os.path.isfile(f"{path}/model.onnx"):
             LOG.info(f"downloading {voice_id}  - this might take a while!")
@@ -177,7 +184,7 @@ class NosTTSPlugin(TTS):
         # substitute ' ºC' by 'graos centígrados' and 'somewordºC' by 'someword graos centígrados'
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
-        if voice == "sabela":
+        if voice != "celtia":
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.cotovia_phonemize(s)
                                   for s in sentence_tokenize(sentence)])
