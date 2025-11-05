@@ -57,7 +57,7 @@ PLUGIN_ENTRY_POINT = 'ovos-tts-plugin-nos = ' \
 
 
 setup(
-    name='ovos-tts-plugin-nos',
+    name='ovos_tts_plugin_nos',
     version=get_version(),
     description='A galician tts plugin for OVOS',
     url='https://github.com/OpenVoiceOS/ovos-tts-plugin-nos',
