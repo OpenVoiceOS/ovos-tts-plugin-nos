@@ -2,6 +2,12 @@
 
 OVOS TTS plugin for [NOS TTS](https://tts.nos.gal/)
 
+-------
+
+> **WARNING**: this plugin is no longer maintained, you should move to [phoonnx](https://github.com/TigreGotico/phoonnx), a generic VITS inference plugin that supports piper, mimic3, coqui, MMS...
+
+-------
+
 ## Install
 
 `pip install ovos-tts-plugin-nos`
