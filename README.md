@@ -6,11 +6,11 @@ OVOS TTS plugin for [NOS TTS](https://tts.nos.gal/)
 
 `pip install ovos-tts-plugin-nos`
 
-To use the `'sabela'` voice you also need to install `cotovia`, follow the steps in [ovos-tts-plugin-cotovia](https://github.com/OpenVoiceOS/ovos-tts-plugin-cotovia)
+To use the `'sabela'` or `icia` voices you also need to install `cotovia`, follow the steps in [ovos-tts-plugin-cotovia](https://github.com/OpenVoiceOS/ovos-tts-plugin-cotovia)
 
 ## Configuration
 
-valid voices are  `'celtia'` and  `'sabela'`
+valid voices are  `'celtia'`, `'icia'` and  `'sabela'`
 
 ```json
   "tts": {
@@ -22,7 +22,7 @@ valid voices are  `'celtia'` and  `'sabela'`
  
 ```
 
-If using voice `sabela`, `bin` can be used to set a path to the `cotovia` executable (default `/usr/bin/cotovia`)
+If using voice `sabela` or `icia`, `bin` can be used to set a path to the `cotovia` executable (default `/usr/bin/cotovia`)
 
 ```json
   "tts": {
