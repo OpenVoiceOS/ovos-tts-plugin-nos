@@ -193,7 +193,7 @@ class NosTTSPlugin(TTS):
         # substitute ' ºC' by 'graos centígrados' and 'somewordºC' by 'someword graos centígrados'
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
-        if voice not in ["celtia", "brais"] and False:
+        if voice not in ["celtia", "brais"]:
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.cotovia_phonemize(s)
                                   for s in sentence_tokenize(sentence)])
