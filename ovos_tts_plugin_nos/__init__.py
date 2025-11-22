@@ -19,6 +19,9 @@ class NosTTSPlugin(TTS):
     CELTIA = "OpenVoiceOS/proxectonos-celtia-vits-graphemes-onnx"
     SABELA = "OpenVoiceOS/proxectonos-sabela-vits-phonemes-onnx"
     ICIA = "OpenVoiceOS/proxectonos-icia-vits-phonemes-onnx"
+    BRAIS = "OpenVoiceOS/proxectonos-brais-vits-graphemes-onnx"
+    IAGO = "OpenVoiceOS/proxectonos-iago-vits-phonemes-onnx"
+    PAULO = "OpenVoiceOS/proxectonos-paulo-vits-phonemes-onnx"
     VOICE2ENGINE: Dict[str, VitsOnnxInference] = {}
 
     def __init__(self, config=None):
@@ -46,7 +49,7 @@ class NosTTSPlugin(TTS):
 
     @staticmethod
     def find_cotovia() -> str:
-        path = which("cotovia") or f"{os.path.dirname(__file__)}/cotovia_{platform.machine()}"
+        path = which("cotovia") or f"{os.path.dirname(__file__)}/bin/cotovia_{platform.machine()}"
         if os.path.isfile(path):
             return path
         return "/usr/bin/cotovia"
@@ -70,7 +73,7 @@ class NosTTSPlugin(TTS):
             - Downloads model files only if they do not already exist locally
             - Streams the model.onnx download in chunks to handle large files efficiently
         """
-        assert voice in ["celtia", "sabela", "icia"]
+        assert voice in ["celtia", "sabela", "icia", "brais", "iago", "paulo"]
 
         path = f"{xdg_data_home()}/nos_tts_models/{voice}"
         os.makedirs(path, exist_ok=True)
@@ -81,6 +84,12 @@ class NosTTSPlugin(TTS):
             voice_id = NosTTSPlugin.SABELA
         elif voice == "icia":
             voice_id = NosTTSPlugin.ICIA
+        elif voice == "brais":
+            voice_id = NosTTSPlugin.BRAIS
+        elif voice == "iago":
+            voice_id = NosTTSPlugin.IAGO
+        elif voice == "paulo":
+            voice_id = NosTTSPlugin.PAULO
         else:
             raise ValueError(f"unknown voice: {voice}")
 
@@ -184,7 +193,7 @@ class NosTTSPlugin(TTS):
         # substitute ' ºC' by 'graos centígrados' and 'somewordºC' by 'someword graos centígrados'
         sentence = re.sub(r"(\w+)\s*ºC", r"\1 graos centígrados", sentence)
 
-        if voice != "celtia":
+        if voice not in ["celtia", "brais"]:
             # preserve sentence boundaries to make the synth more natural
             sentence = ". ".join([self.cotovia_phonemize(s)
                                   for s in sentence_tokenize(sentence)])
