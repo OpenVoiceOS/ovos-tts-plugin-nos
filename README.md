@@ -69,7 +69,7 @@ All available Galician voices (and every other supported voice) are listed in [V
 
 ## Credits
 
-This plugin was developed by [TigreGotico](https://github.com/TigreGotico) for OpenVoiceOS under the ILENIA project.
+This plugin was developed by [TigreGotico](https://tigregotico.pt) for OpenVoiceOS under the ILENIA project.
 
 <img src="img.png" width="128"/>
 
