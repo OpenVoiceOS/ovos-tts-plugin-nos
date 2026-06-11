@@ -42,8 +42,8 @@ For the cotovia-phonemized voices (`sabela`, `icia`, `iago`, `paulo`, `brais-cot
 **After:**
 ```json
 "tts": {
-  "module": "phoonnx",
-  "phoonnx": {
+  "module": "ovos-tts-plugin-phoonnx",
+  "ovos-tts-plugin-phoonnx": {
     "voice": "proxectonos/celtia"
   }
 }
@@ -52,8 +52,8 @@ For the cotovia-phonemized voices (`sabela`, `icia`, `iago`, `paulo`, `brais-cot
 For a cotovia voice:
 ```json
 "tts": {
-  "module": "phoonnx",
-  "phoonnx": {
+  "module": "ovos-tts-plugin-phoonnx",
+  "ovos-tts-plugin-phoonnx": {
     "voice": "proxectonos/sabela-cotovia"
   }
 }
@@ -69,7 +69,7 @@ All available Galician voices (and every other supported voice) are listed in [V
 
 ## Credits
 
-Original plugin by the OpenVoiceOS community. Voices by [Proxecto Nós](https://github.com/proxectonos).
+This plugin was developed by [TigreGotico](https://github.com/TigreGotico) for OpenVoiceOS under the ILENIA project.
 
 <img src="img.png" width="128"/>
 
