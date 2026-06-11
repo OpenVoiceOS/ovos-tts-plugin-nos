@@ -1,48 +1,75 @@
-## Description
+> **This repository is archived. No further updates will be made.**
+>
+> The NOS/Proxecto Nós Galician voices have been absorbed into [phoonnx](https://github.com/TigreGotico/phoonnx), a unified ONNX TTS plugin. Migrate using the guide below.
 
-OVOS TTS plugin for [NOS TTS](https://tts.nos.gal/)
-
--------
-
-> **WARNING**: this plugin is no longer maintained, you should move to [phoonnx](https://github.com/TigreGotico/phoonnx), a generic VITS inference plugin that supports piper, mimic3, coqui, MMS...
-
--------
+# ovos-tts-plugin-nos → phoonnx migration
 
 ## Install
 
-`pip install ovos-tts-plugin-nos`
+```bash
+pip install phoonnx
+```
 
-To use the `'sabela'` or `icia` voices you also need to install `cotovia`, follow the steps in [ovos-tts-plugin-cotovia](https://github.com/OpenVoiceOS/ovos-tts-plugin-cotovia)
+For the cotovia-phonemized voices (`sabela`, `icia`, `iago`, `paulo`, `brais-cotovia`, `celtia-cotovia`), `cotovia` must be available in your base OS — same requirement as before. Follow the install steps in [ovos-tts-plugin-cotovia](https://github.com/OpenVoiceOS/ovos-tts-plugin-cotovia).
 
-## Configuration
+## Voice mapping
 
-valid voices are  `'celtia'`, `'icia'` and  `'sabela'`
+| Old voice | phoonnx voice id | Phonemizer |
+|-----------|-----------------|------------|
+| `celtia` | `proxectonos/celtia` | graphemes (no cotovia needed) |
+| `sabela` | `proxectonos/sabela-cotovia` | cotovia |
+| `icia` | `proxectonos/icia-cotovia` | cotovia |
+| — | `proxectonos/brais` | graphemes (no cotovia needed) |
+| — | `proxectonos/brais-cotovia` | cotovia |
+| — | `proxectonos/celtia-cotovia` | cotovia |
+| — | `proxectonos/paulo-cotovia` | cotovia |
+| — | `proxectonos/iago-cotovia` | cotovia |
 
+`proxectonos/celtia` and `proxectonos/brais` are recommended for systems without cotovia installed.
+
+## Configuration mapping
+
+**Before:**
 ```json
-  "tts": {
-    "module": "ovos-tts-plugin-nos",
-    "ovos-tts-plugin-nos": {
-      "voice": "celtia"
-    }
+"tts": {
+  "module": "ovos-tts-plugin-nos",
+  "ovos-tts-plugin-nos": {
+    "voice": "celtia"
   }
- 
+}
 ```
 
-If using voice `sabela` or `icia`, `bin` can be used to set a path to the `cotovia` executable (default `/usr/bin/cotovia`)
-
+**After:**
 ```json
-  "tts": {
-    "module": "ovos-tts-plugin-nos",
-    "ovos-tts-plugin-nos": {
-      "voice": "sabela",
-      "bin": "/usr/bin/cotovia"
-    }
-   }
- 
+"tts": {
+  "module": "phoonnx",
+  "phoonnx": {
+    "voice": "proxectonos/celtia"
+  }
+}
 ```
 
+For a cotovia voice:
+```json
+"tts": {
+  "module": "phoonnx",
+  "phoonnx": {
+    "voice": "proxectonos/sabela-cotovia"
+  }
+}
+```
+
+### Auto-select by language
+
+Set your OVOS language to `gl-ES` and leave `voice` unset — phoonnx will select a Galician voice automatically.
+
+## Voice catalogue
+
+All available Galician voices (and every other supported voice) are listed in [VOICES.md](https://github.com/TigreGotico/phoonnx/blob/dev/VOICES.md) — that is the canonical reference for voice IDs to use in your config.
 
 ## Credits
+
+Original plugin by the OpenVoiceOS community. Voices by [Proxecto Nós](https://github.com/proxectonos).
 
 <img src="img.png" width="128"/>
 
@@ -50,4 +77,4 @@ If using voice `sabela` or `icia`, `bin` can be used to set a path to the `cotov
 
 <img src="img_1.png" width="64"/>
 
-> This research was funded by [Proxecto Nós](https://github.com/proxectonos) - “The Nós project: Galician in the society and economy of Artificial Intelligence”, resulting from the agreement 2021-CP080 between the Xunta de Galicia and the University of Santiago de Compostela, and thanks to the Investigo program, within the National Recovery, Transformation and Resilience Plan, within the framework of the European Recovery Fund (NextGenerationEU).
+> This research was funded by [Proxecto Nós](https://github.com/proxectonos) — "The Nós project: Galician in the society and economy of Artificial Intelligence", resulting from the agreement 2021-CP080 between the Xunta de Galicia and the University of Santiago de Compostela, and thanks to the Investigo program, within the National Recovery, Transformation and Resilience Plan, within the framework of the European Recovery Fund (NextGenerationEU).
